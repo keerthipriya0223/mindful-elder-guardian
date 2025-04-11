@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import StatusCard from '@/components/dashboard/StatusCard';
 import ReminderCard, { Reminder } from '@/components/dashboard/ReminderCard';
+import AgentInteractionCard from '@/components/dashboard/AgentInteractionCard';
 import { useToast } from '@/components/ui/use-toast';
 
 const Dashboard = () => {
@@ -66,15 +67,19 @@ const Dashboard = () => {
     <div className="container px-4 py-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Elder Guardian Dashboard</h1>
           <p className="text-muted-foreground">
-            Monitor your health and stay on track with your daily schedule.
+            Multi-agent AI system monitoring your health, safety, and daily schedule.
           </p>
         </div>
         <Button className="btn-guardian">
           <PlusCircle className="mr-2 h-4 w-4" />
           Add New Reminder
         </Button>
+      </div>
+
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-12 mb-6">
+        <AgentInteractionCard />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
