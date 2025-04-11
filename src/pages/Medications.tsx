@@ -1,31 +1,11 @@
-import React, { useState } from 'react';
-import { 
-  Clock, 
-  PlusCircle, 
-  Pill, 
-  Calendar, 
-  AlertTriangle,
-  Search,
-  CheckCircle2
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/components/ui/use-toast';
 
-interface Medication {
-  id: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  time: string;
-  notes?: string;
-  status: 'taken' | 'missed' | 'upcoming';
-  refillReminder?: boolean;
-  refillDate?: string;
-}
+import React, { useState } from 'react';
+import { PlusCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+import { Medication } from '@/types/medication';
+import MedicationSearch from '@/components/medications/MedicationSearch';
+import MedicationTabs from '@/components/medications/MedicationTabs';
 
 const Medications = () => {
   const { toast } = useToast();
@@ -95,12 +75,6 @@ const Medications = () => {
     med.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const statusColorMap = {
-    taken: 'bg-guardian-success/20 text-guardian-success',
-    missed: 'bg-guardian-emergency/20 text-guardian-emergency',
-    upcoming: 'bg-blue-100 text-blue-800',
-  };
-
   return (
     <div className="container px-4 py-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -116,229 +90,15 @@ const Medications = () => {
         </Button>
       </div>
 
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search medications..."
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
+      <MedicationSearch 
+        searchTerm={searchTerm} 
+        onSearchChange={setSearchTerm} 
+      />
 
-      <Tabs defaultValue="all" className="mb-6">
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="today">Today</TabsTrigger>
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="taken">Taken</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="all" className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredMedications.map(med => (
-              <Card key={med.id} className="card-guardian">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl font-semibold">{med.name}</CardTitle>
-                    <Badge className={statusColorMap[med.status]}>
-                      {med.status.charAt(0).toUpperCase() + med.status.slice(1)}
-                    </Badge>
-                  </div>
-                  <div className="text-sm text-muted-foreground">{med.dosage}</div>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{med.frequency}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{med.time}</span>
-                    </div>
-                    {med.notes && (
-                      <div className="text-sm text-muted-foreground">
-                        Note: {med.notes}
-                      </div>
-                    )}
-                    {med.refillReminder && (
-                      <div className="flex items-center gap-2 text-amber-600">
-                        <AlertTriangle className="h-4 w-4" />
-                        <span className="text-sm">Refill by {med.refillDate}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-2">
-                  {med.status !== 'taken' && (
-                    <Button 
-                      className="w-full btn-guardian"
-                      onClick={() => handleMarkAsTaken(med.id)}
-                    >
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                      Mark as Taken
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="today" className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredMedications
-              .filter(med => med.time.includes('AM') || med.time.includes('PM'))
-              .map(med => (
-                <Card key={med.id} className="card-guardian">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-xl font-semibold">{med.name}</CardTitle>
-                      <Badge className={statusColorMap[med.status]}>
-                        {med.status.charAt(0).toUpperCase() + med.status.slice(1)}
-                      </Badge>
-                    </div>
-                    <div className="text-sm text-muted-foreground">{med.dosage}</div>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{med.frequency}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{med.time}</span>
-                      </div>
-                      {med.notes && (
-                        <div className="text-sm text-muted-foreground">
-                          Note: {med.notes}
-                        </div>
-                      )}
-                      {med.refillReminder && (
-                        <div className="flex items-center gap-2 text-amber-600">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-sm">Refill by {med.refillDate}</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                  <CardFooter className="pt-2">
-                    {med.status !== 'taken' && (
-                      <Button 
-                        className="w-full btn-guardian"
-                        onClick={() => handleMarkAsTaken(med.id)}
-                      >
-                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                        Mark as Taken
-                      </Button>
-                    )}
-                  </CardFooter>
-                </Card>
-              ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="upcoming" className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredMedications
-              .filter(med => med.status === 'upcoming')
-              .map(med => (
-                <Card key={med.id} className="card-guardian">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-xl font-semibold">{med.name}</CardTitle>
-                      <Badge className={statusColorMap[med.status]}>
-                        {med.status.charAt(0).toUpperCase() + med.status.slice(1)}
-                      </Badge>
-                    </div>
-                    <div className="text-sm text-muted-foreground">{med.dosage}</div>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{med.frequency}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{med.time}</span>
-                      </div>
-                      {med.notes && (
-                        <div className="text-sm text-muted-foreground">
-                          Note: {med.notes}
-                        </div>
-                      )}
-                      {med.refillReminder && (
-                        <div className="flex items-center gap-2 text-amber-600">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-sm">Refill by {med.refillDate}</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                  <CardFooter className="pt-2">
-                    {med.status !== 'taken' && (
-                      <Button 
-                        className="w-full btn-guardian"
-                        onClick={() => handleMarkAsTaken(med.id)}
-                      >
-                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                        Mark as Taken
-                      </Button>
-                    )}
-                  </CardFooter>
-                </Card>
-              ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="taken" className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredMedications
-              .filter(med => med.status === 'taken')
-              .map(med => (
-                <Card key={med.id} className="card-guardian">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-xl font-semibold">{med.name}</CardTitle>
-                      <Badge className={statusColorMap[med.status]}>
-                        {med.status.charAt(0).toUpperCase() + med.status.slice(1)}
-                      </Badge>
-                    </div>
-                    <div className="text-sm text-muted-foreground">{med.dosage}</div>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{med.frequency}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{med.time}</span>
-                      </div>
-                      {med.notes && (
-                        <div className="text-sm text-muted-foreground">
-                          Note: {med.notes}
-                        </div>
-                      )}
-                      {med.refillReminder && (
-                        <div className="flex items-center gap-2 text-amber-600">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-sm">Refill by {med.refillDate}</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+      <MedicationTabs 
+        medications={filteredMedications}
+        onMarkAsTaken={handleMarkAsTaken}
+      />
     </div>
   );
 };
